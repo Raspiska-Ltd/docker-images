@@ -1,0 +1,186 @@
+version: '3'
+
+services:
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: raspiska_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/rules:/etc/prometheus/rules
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring_network
+      - traefik_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.raspiska.local`)"
+      - "traefik.http.routers.prometheus.entrypoints=web"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.http.routers.prometheus.middlewares=secure-headers@file"
+
+  # Grafana - Visualization
+  grafana:
+    image: grafana/grafana:10.0.3
+    container_name: raspiska_grafana
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
+      - ./dashboards:/etc/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://grafana.raspiska.local
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-piechart-panel
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring_network
+      - traefik_network
+    depends_on:
+      - prometheus
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.raspiska.local`)"
+      - "traefik.http.routers.grafana.entrypoints=web"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.http.routers.grafana.middlewares=secure-headers@file"
+
+  # Alertmanager - Alert Handling
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: raspiska_alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./config/alertmanager.yml:/etc/alertmanager/config.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring_network
+      - traefik_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.raspiska.local`)"
+      - "traefik.http.routers.alertmanager.entrypoints=web"
+      - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
+      - "traefik.http.routers.alertmanager.middlewares=secure-headers@file"
+
+  # Node Exporter - Host Metrics
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: raspiska_node_exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring_network
+
+  # Redis Exporter - Redis Metrics
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.45.0
+    container_name: raspiska_redis_exporter
+    restart: unless-stopped
+    environment:
+      - REDIS_ADDR=redis://raspiska_redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    ports:
+      - "9121:9121"
+    networks:
+      - monitoring_network
+      - redis_network
+
+  # Valkey Exporter - Valkey Metrics (using Redis exporter)
+  valkey-exporter:
+    image: oliver006/redis_exporter:v1.45.0
+    container_name: raspiska_valkey_exporter
+    restart: unless-stopped
+    environment:
+      - REDIS_ADDR=redis://raspiska_valkey:6380
+      - REDIS_PASSWORD=${VALKEY_PASSWORD:-}
+    ports:
+      - "9122:9121"
+    networks:
+      - monitoring_network
+      - valkey_network
+
+  # Postgres Exporter - PostgreSQL Metrics
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.12.0
+    container_name: raspiska_postgres_exporter
+    restart: unless-stopped
+    environment:
+      - DATA_SOURCE_NAME=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@raspiska_kong_db:5432/postgres?sslmode=disable
+    ports:
+      - "9187:9187"
+    networks:
+      - monitoring_network
+      - kong_network
+      - keycloak_network
+      - n8n_network
+
+  # Kong Exporter - Kong Metrics
+  kong-exporter:
+    image: kong/prometheus-plugin:1.1
+    container_name: raspiska_kong_exporter
+    restart: unless-stopped
+    environment:
+      - KONG_ADMIN_URL=http://raspiska_kong:8001
+    ports:
+      - "9542:9542"
+    networks:
+      - monitoring_network
+      - kong_network
+
+volumes:
+  prometheus_data:
+    name: raspiska_prometheus_data
+  grafana_data:
+    name: raspiska_grafana_data
+  alertmanager_data:
+    name: raspiska_alertmanager_data
+
+networks:
+  monitoring_network:
+    name: raspiska_monitoring_network
+  traefik_network:
+    external: true
+    name: raspiska_traefik_network
+  redis_network:
+    external: true
+    name: raspiska_redis_network
+  valkey_network:
+    external: true
+    name: raspiska_valkey_network
+  kong_network:
+    external: true
+    name: raspiska_kong_network
+  keycloak_network:
+    external: true
+    name: raspiska_keycloak_network
+  n8n_network:
+    external: true
+    name: raspiska_n8n_network

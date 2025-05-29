@@ -1,0 +1,82 @@
+groups:
+  - name: raspiska-alerts
+    rules:
+      # Instance alerts
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+      
+      # High CPU usage alerts
+      - alert: HighCPULoad
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU load on {{ $labels.instance }}"
+          description: "CPU load is above 80% for 5 minutes on {{ $labels.instance }}"
+      
+      # Memory alerts
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is above 85% for 5 minutes on {{ $labels.instance }}"
+      
+      # Disk space alerts
+      - alert: DiskSpaceRunningOut
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space running out on {{ $labels.instance }}"
+          description: "Disk space is below 10% on {{ $labels.instance }}"
+      
+      # Redis alerts
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis instance {{ $labels.instance }} is down"
+          description: "Redis instance {{ $labels.instance }} has been down for more than 1 minute."
+      
+      # PostgreSQL alerts
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL instance {{ $labels.instance }} is down"
+          description: "PostgreSQL instance {{ $labels.instance }} has been down for more than 1 minute."
+      
+      # Traefik alerts
+      - alert: TraefikHighHttp4xxErrorRate
+        expr: sum(rate(traefik_service_requests_total{code=~"4.."}[5m])) by (service) / sum(rate(traefik_service_requests_total[5m])) by (service) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High HTTP 4xx error rate on {{ $labels.service }}"
+          description: "HTTP 4xx error rate is above 5% for 5 minutes on {{ $labels.service }}"
+      
+      # n8n workflow failure alerts
+      - alert: N8nWorkflowFailures
+        expr: n8n_workflow_runs_total{status="failed"} > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "n8n workflow failures detected"
+          description: "n8n workflows have been failing for the last 5 minutes"

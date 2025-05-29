@@ -123,6 +123,23 @@ An n8n workflow automation platform for connecting services and automating tasks
 
 **Directory:** [/n8n](/n8n)
 
+### Monitoring Stack
+
+A comprehensive monitoring solution for all Raspiska Tech services.
+
+**Features:**
+
+- Prometheus for metrics collection and storage
+- Grafana for visualization and dashboarding
+- Alertmanager for alert handling and notifications
+- Node Exporter for host system metrics
+- Service-specific exporters for Redis, Valkey, PostgreSQL, and Kong
+- Pre-configured dashboards for all services
+- Alert rules for common failure scenarios
+- Multiple notification channels (email, Slack)
+
+**Directory:** [/monitoring](/monitoring)
+
 ## Usage
 
 Each image directory contains a `setup.sh` script that automates the process of building, running, and testing the Docker container. To use any of these images:
