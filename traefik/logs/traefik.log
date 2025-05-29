@@ -1,0 +1,34 @@
+time="2025-05-29T13:40:28+03:00" level=info msg="Traefik version 2.10.7 built on 2023-12-06T15:54:59Z"
+time="2025-05-29T13:40:28+03:00" level=info msg="\nStats collection is disabled.\nHelp us improve Traefik by turning this feature on :)\nMore details on: https://doc.traefik.io/traefik/contributing/data-collection/\n"
+time="2025-05-29T13:40:28+03:00" level=info msg="Starting provider aggregator aggregator.ProviderAggregator"
+time="2025-05-29T13:40:28+03:00" level=info msg="Starting provider *file.Provider"
+time="2025-05-29T13:40:28+03:00" level=info msg="Starting provider *traefik.Provider"
+time="2025-05-29T13:40:28+03:00" level=info msg="Starting provider *docker.Provider"
+time="2025-05-29T13:40:28+03:00" level=info msg="Starting provider *acme.ChallengeTLSALPN"
+time="2025-05-29T13:40:28+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" entryPointName=web routerName=valkey@file
+time="2025-05-29T13:40:28+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" entryPointName=web routerName=redis@file
+time="2025-05-29T13:40:28+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" entryPointName=web routerName=redis@file
+time="2025-05-29T13:40:28+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" routerName=valkey@file entryPointName=web
+time="2025-05-29T13:42:06+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" entryPointName=web routerName=redis@file
+time="2025-05-29T13:42:06+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" entryPointName=web routerName=valkey@file
+time="2025-05-29T13:42:24+03:00" level=info msg="I have to go..."
+time="2025-05-29T13:42:24+03:00" level=info msg="Stopping server gracefully"
+time="2025-05-29T13:42:24+03:00" level=error msg="accept tcp [::]:8080: use of closed network connection" entryPointName=traefik
+time="2025-05-29T13:42:24+03:00" level=error msg="accept tcp [::]:443: use of closed network connection" entryPointName=websecure
+time="2025-05-29T13:42:24+03:00" level=error msg="accept tcp [::]:80: use of closed network connection" entryPointName=web
+time="2025-05-29T13:42:24+03:00" level=error msg="close tcp [::]:8080: use of closed network connection" entryPointName=traefik
+time="2025-05-29T13:42:24+03:00" level=error msg="close tcp [::]:80: use of closed network connection" entryPointName=web
+time="2025-05-29T13:42:24+03:00" level=error msg="close tcp [::]:443: use of closed network connection" entryPointName=websecure
+time="2025-05-29T13:42:24+03:00" level=info msg="Server stopped"
+time="2025-05-29T13:42:24+03:00" level=info msg="Shutting down"
+time="2025-05-29T13:42:45+03:00" level=info msg="Traefik version 2.10.7 built on 2023-12-06T15:54:59Z"
+time="2025-05-29T13:42:45+03:00" level=info msg="\nStats collection is disabled.\nHelp us improve Traefik by turning this feature on :)\nMore details on: https://doc.traefik.io/traefik/contributing/data-collection/\n"
+time="2025-05-29T13:42:45+03:00" level=info msg="Starting provider aggregator aggregator.ProviderAggregator"
+time="2025-05-29T13:42:45+03:00" level=info msg="Starting provider *file.Provider"
+time="2025-05-29T13:42:45+03:00" level=info msg="Starting provider *traefik.Provider"
+time="2025-05-29T13:42:45+03:00" level=info msg="Starting provider *acme.ChallengeTLSALPN"
+time="2025-05-29T13:42:45+03:00" level=info msg="Starting provider *docker.Provider"
+time="2025-05-29T13:42:45+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" routerName=valkey@file entryPointName=web
+time="2025-05-29T13:42:45+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" entryPointName=web routerName=redis@file
+time="2025-05-29T13:42:45+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" entryPointName=web routerName=redis@file
+time="2025-05-29T13:42:45+03:00" level=error msg="middleware \"secure-headers@file\" does not exist" entryPointName=web routerName=valkey@file

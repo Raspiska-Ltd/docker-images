@@ -60,6 +60,22 @@ A custom Valkey image (Redis-compatible database) with persistence, high availab
 
 **Directory:** [/valkey](/valkey)
 
+### Traefik Reverse Proxy
+
+A Traefik reverse proxy and load balancer for managing access to all Raspiska Tech services.
+
+**Features:**
+
+- Automatic service discovery and configuration
+- Dynamic routing without restarts
+- Visual dashboard for monitoring and management
+- Middleware support (rate limiting, authentication, etc.)
+- SSL/TLS support with Let's Encrypt integration
+- Health checks and load balancing
+- Comprehensive documentation for adding new services
+
+**Directory:** [/traefik](/traefik)
+
 ## Usage
 
 Each image directory contains a `setup.sh` script that automates the process of building, running, and testing the Docker container. To use any of these images:

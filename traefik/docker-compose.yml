@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: raspiska_traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"      # HTTP
+      - "443:443"    # HTTPS
+      - "8080:8080"  # Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./config/dynamic:/etc/traefik/dynamic:ro
+      - ./certs:/etc/certs:ro
+      - ./logs:/var/log/traefik
+      - traefik_data:/data
+    networks:
+      - traefik_network
+      - redis_network
+      - valkey_network
+    environment:
+      - TZ=Europe/Istanbul
+    labels:
+      - "traefik.enable=true"
+      # Dashboard
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.raspiska.local`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
+      # Global middleware
+      - "traefik.http.middlewares.secure-headers.headers.sslRedirect=true"
+      - "traefik.http.middlewares.secure-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.secure-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.secure-headers.headers.browserXssFilter=true"
+
+volumes:
+  traefik_data:
+    name: raspiska_traefik_data
+
+networks:
+  traefik_network:
+    name: raspiska_traefik_network
+  # Connect to Redis and Valkey networks
+  redis_network:
+    external: true
+    name: raspiska_redis_network
+  valkey_network:
+    external: true
+    name: raspiska_valkey_network

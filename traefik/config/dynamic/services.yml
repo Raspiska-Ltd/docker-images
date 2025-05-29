@@ -1,0 +1,58 @@
+## Dynamic Configuration for Raspiska Tech Services
+
+http:
+  routers:
+    # Redis Router
+    redis:
+      rule: "Host(`redis.raspiska.local`)"
+      service: redis
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+    # Valkey Router
+    valkey:
+      rule: "Host(`valkey.raspiska.local`)"
+      service: valkey
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+  services:
+    # Redis Service
+    redis:
+      loadBalancer:
+        servers:
+          - url: "tcp://raspiska_redis:6379"
+        passHostHeader: true
+
+    # Valkey Service
+    valkey:
+      loadBalancer:
+        servers:
+          - url: "tcp://raspiska_valkey:6379"
+        passHostHeader: true
+
+  middlewares:
+    # Rate Limiting Middleware
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 50
+
+    # Basic Authentication Middleware (for development)
+    basic-auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"  # Password: admin_password
+        
+    # IP Whitelist Middleware (for sensitive services)
+    ip-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "127.0.0.1/32"
+          - "10.0.0.0/8"
+          - "172.16.0.0/12"
+          - "192.168.0.0/16"

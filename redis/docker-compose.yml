@@ -13,14 +13,20 @@ services:
     volumes:
       - redis_data:/redis-data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5
     restart: unless-stopped
     extra_hosts:
       - "redis.local:127.0.0.1"
+    networks:
+      - redis_network
 
 volumes:
   redis_data:
     name: raspiska_redis_data
+
+networks:
+  redis_network:
+    name: raspiska_redis_network

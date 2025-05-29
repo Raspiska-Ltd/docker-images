@@ -20,7 +20,13 @@ services:
     restart: unless-stopped
     extra_hosts:
       - "valkey.local:127.0.0.1"
+    networks:
+      - valkey_network
 
 volumes:
   valkey_data:
     name: raspiska_valkey_data
+    
+networks:
+  valkey_network:
+    name: raspiska_valkey_network

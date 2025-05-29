@@ -1,0 +1,55 @@
+## Traefik Global Configuration for Raspiska Tech
+
+# API and dashboard configuration
+api:
+  dashboard: true
+  insecure: true  # For development only, use secure: true with proper authentication in production
+
+# Docker configuration
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: raspiska_traefik_network
+    watch: true
+  file:
+    directory: "/etc/traefik/dynamic"
+    watch: true
+
+# Entry points configuration
+entryPoints:
+  web:
+    address: ":80"
+    # Uncomment for automatic HTTPS redirection in production
+    # http:
+    #   redirections:
+    #     entryPoint:
+    #       to: websecure
+    #       scheme: https
+  websecure:
+    address: ":443"
+
+# Let's Encrypt configuration (commented out for local development)
+# certificatesResolvers:
+#   letsencrypt:
+#     acme:
+#       email: "admin@raspiska.co"
+#       storage: "/data/acme.json"
+#       httpChallenge:
+#         entryPoint: web
+
+# Logs configuration
+log:
+  level: "INFO"
+  filePath: "/var/log/traefik/traefik.log"
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  bufferingSize: 100
+
+# Metrics configuration (optional)
+# metrics:
+#   prometheus:
+#     entryPoint: metrics
+#     addServicesLabels: true
+#     addEntryPointsLabels: true
