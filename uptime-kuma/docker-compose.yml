@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  # Uptime Kuma - Status Page & Monitoring
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: raspiska_uptime_kuma
+    restart: unless-stopped
+    volumes:
+      - uptime_kuma_data:/app/data
+    ports:
+      - "3001:3001"  # Uptime Kuma web UI
+    environment:
+      - UPTIME_KUMA_PORT=3001
+      - TZ=Europe/Istanbul
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - uptime_kuma_network
+      - traefik_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.uptime-kuma.rule=Host(`status.raspiska.local`)"
+      - "traefik.http.routers.uptime-kuma.entrypoints=web"
+      - "traefik.http.services.uptime-kuma.loadbalancer.server.port=3001"
+      - "traefik.http.routers.uptime-kuma.middlewares=secure-headers@file"
+
+volumes:
+  uptime_kuma_data:
+    name: raspiska_uptime_kuma_data
+
+networks:
+  uptime_kuma_network:
+    name: raspiska_uptime_kuma_network
+  traefik_network:
+    external: true
+    name: raspiska_traefik_network

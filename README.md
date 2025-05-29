@@ -140,6 +140,38 @@ A comprehensive monitoring solution for all Raspiska Tech services.
 
 **Directory:** [/monitoring](/monitoring)
 
+### Uptime Kuma Status Page
+
+A modern status page and monitoring tool for all Raspiska Tech services.
+
+**Features:**
+
+- Clean and simple status dashboard
+- Multiple monitor types (HTTP, TCP, DNS, PING)
+- Real-time status updates
+- Multiple notification channels (Email, Telegram, Discord, Slack)
+- Response time graphs and status history
+- Multi-language support
+- Low resource usage
+
+**Directory:** [/uptime-kuma](/uptime-kuma)
+
+### Custom PostgreSQL Database
+
+A high-performance PostgreSQL database with custom configuration and tools.
+
+**Features:**
+
+- PostgreSQL 15 with optimized configuration
+- PgBouncer for connection pooling
+- pgAdmin for web-based administration
+- Automated daily backups with configurable retention
+- Custom user accounts and security settings
+- SSL support for secure connections
+- Integration with Prometheus for monitoring
+
+**Directory:** [/postgresql](/postgresql)
+
 ## Usage
 
 Each image directory contains a `setup.sh` script that automates the process of building, running, and testing the Docker container. To use any of these images:
