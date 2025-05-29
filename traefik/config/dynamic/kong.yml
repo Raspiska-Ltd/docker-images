@@ -1,0 +1,34 @@
+http:
+  routers:
+    # Kong API Gateway Router
+    kong:
+      rule: "Host(`kong.raspiska.local`)"
+      service: kong
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+    # Kong Admin API Router
+    kong-admin:
+      rule: "Host(`kong-admin.raspiska.local`)"
+      service: kong-admin
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+  services:
+    # Kong API Gateway Service
+    kong:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_kong:8000"
+        passHostHeader: true
+
+    # Kong Admin API Service
+    kong-admin:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_kong:8001"
+        passHostHeader: true

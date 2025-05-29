@@ -76,6 +76,22 @@ A Traefik reverse proxy and load balancer for managing access to all Raspiska Te
 
 **Directory:** [/traefik](/traefik)
 
+### Kong API Gateway
+
+A Kong API Gateway with Konga admin UI for managing APIs and microservices.
+
+**Features:**
+
+- High-performance API gateway with plugin architecture
+- Konga web-based admin interface for easy management
+- PostgreSQL database for configuration storage
+- Authentication, rate limiting, and request transformation
+- Microservice routing and load balancing
+- Integration with Redis for caching and rate limiting
+- Comprehensive documentation for API management
+
+**Directory:** [/kong](/kong)
+
 ## Usage
 
 Each image directory contains a `setup.sh` script that automates the process of building, running, and testing the Docker container. To use any of these images:
