@@ -107,6 +107,22 @@ A Keycloak identity and access management solution for authentication and author
 
 **Directory:** [/keycloak](/keycloak)
 
+### n8n Workflow Automation
+
+An n8n workflow automation platform for connecting services and automating tasks.
+
+**Features:**
+
+- Visual workflow editor for automation without coding
+- AI content generation with OpenAI integration
+- Multi-channel notification system (email, Slack, SMS)
+- Data integration and synchronization capabilities
+- Webhook endpoints for external triggers
+- PostgreSQL database for workflow storage
+- Sample workflows for common automation tasks
+
+**Directory:** [/n8n](/n8n)
+
 ## Usage
 
 Each image directory contains a `setup.sh` script that automates the process of building, running, and testing the Docker container. To use any of these images:

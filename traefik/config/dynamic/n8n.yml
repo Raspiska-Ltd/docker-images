@@ -1,0 +1,18 @@
+http:
+  routers:
+    # n8n Router
+    n8n:
+      rule: "Host(`n8n.raspiska.local`)"
+      service: n8n
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+  services:
+    # n8n Service
+    n8n:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_n8n:5678"
+        passHostHeader: true

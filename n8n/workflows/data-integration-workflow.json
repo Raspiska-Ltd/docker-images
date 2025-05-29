@@ -1,0 +1,217 @@
+{
+  "name": "Data Integration and Synchronization",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/data",
+        "options": {
+          "headers": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{$env.API_TOKEN}}"
+              }
+            ]
+          }
+        }
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO external_data (id, name, value, updated_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), value = VALUES(value), updated_at = VALUES(updated_at)",
+        "additionalFields": {}
+      },
+      "name": "MySQL",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "1",
+          "name": "MySQL Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.success }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "Data synchronization completed successfully! Processed {{ $json.affectedRows }} records.",
+        "additionalFields": {}
+      },
+      "name": "Telegram Success",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        200
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "2",
+          "name": "Telegram Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "❌ Data synchronization failed: {{ $json.error }}",
+        "additionalFields": {}
+      },
+      "name": "Telegram Error",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        400
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "2",
+          "name": "Telegram Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Process the incoming data\nconst processedItems = [];\n\n// Loop through all items\nfor (const item of items) {\n  // Process each record from the API\n  if (Array.isArray(item.json.data)) {\n    item.json.data.forEach(record => {\n      processedItems.push({\n        json: {\n          id: record.id,\n          name: record.name,\n          value: record.value,\n          updated_at: new Date().toISOString(),\n          // Add a query parameter for the MySQL node\n          queryParameters: [record.id, record.name, record.value, new Date().toISOString()]\n        }\n      });\n    });\n  }\n}\n\n// Add summary information\nif (processedItems.length > 0) {\n  processedItems.push({\n    json: {\n      success: true,\n      affectedRows: processedItems.length,\n      timestamp: new Date().toISOString()\n    }\n  });\n} else {\n  processedItems.push({\n    json: {\n      success: false,\n      error: 'No data received from API',\n      timestamp: new Date().toISOString()\n    }\n  });\n}\n\nreturn processedItems;"
+      },
+      "name": "Process Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        650,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Process Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Data": {
+      "main": [
+        [
+          {
+            "node": "MySQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Telegram Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "versionId": "3",
+  "id": "3",
+  "meta": {
+    "instanceId": "raspiska_n8n"
+  },
+  "tags": [
+    {
+      "name": "Integration",
+      "color": "#FF9900"
+    }
+  ]
+}

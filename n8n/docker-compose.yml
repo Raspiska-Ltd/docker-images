@@ -24,6 +24,7 @@ services:
       - DB_POSTGRESDB_USER=n8n
       - DB_POSTGRESDB_PASSWORD=${N8N_DB_PASSWORD}
       - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_SECURE_COOKIE=false
       - TZ=Europe/Istanbul
     volumes:
       - n8n_data:/home/node/.n8n
