@@ -28,8 +28,6 @@ entryPoints:
     #       scheme: https
   websecure:
     address: ":443"
-  postgres:
-    address: ":5432"
 
 # Let's Encrypt configuration (commented out for local development)
 # certificatesResolvers:
@@ -56,6 +54,5 @@ accessLog:
 #     addServicesLabels: true
 #     addEntryPointsLabels: true
 
-  # PostgreSQL entrypoint
-  postgres:
-    address: ":5432"
+  # PostgreSQL entrypoint has been removed to prevent conflicts
+  # Direct connection to PostgreSQL should be made via port 5432 on the host

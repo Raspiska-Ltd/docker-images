@@ -17,7 +17,7 @@ services:
       - ./init.groovy.d:/var/jenkins_home/init.groovy.d
       - ./casc:/var/jenkins_home/casc_configs
     ports:
-      - "8080:8080"
+      - "8181:8080"
       - "50000:50000"
     networks:
       - jenkins_network

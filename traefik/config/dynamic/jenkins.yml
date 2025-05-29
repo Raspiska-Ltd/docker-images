@@ -1,0 +1,26 @@
+http:
+  routers:
+    # Jenkins Router
+    jenkins:
+      rule: "Host(`jenkins.raspiska.local`)"
+      service: "jenkins"
+      entryPoints:
+        - "web"
+      middlewares:
+        - "jenkins-stripprefix"
+        - "secure-headers"
+
+  services:
+    # Jenkins Service
+    jenkins:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_jenkins:8080"
+        passHostHeader: true
+
+  middlewares:
+    # Jenkins Strip Prefix Middleware
+    jenkins-stripprefix:
+      stripPrefix:
+        prefixes:
+          - "/jenkins"

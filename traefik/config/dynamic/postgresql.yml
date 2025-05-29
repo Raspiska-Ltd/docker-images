@@ -1,17 +1,17 @@
-tcp:
-  routers:
-    # PostgreSQL Router
-    postgres:
-      entryPoints:
-        - "postgres"
-      rule: "HostSNI(`*`)"
-      service: "postgres"
-      tls:
-        passthrough: true
+# PostgreSQL configuration has been disabled to prevent conflicts
+# Direct connection to PostgreSQL should be made via port 5432 on the host
+# http:
+#   routers:
+#     pgadmin:
+#       rule: "Host(`pgadmin.raspiska.local`)"
+#       service: "pgadmin"
+#       middlewares:
+#         - "secure-headers"
+#       entryPoints:
+#         - "web"
 
-  services:
-    # PostgreSQL Service
-    postgres:
-      loadBalancer:
-        servers:
-          - address: "raspiska_postgres:5432"
+#   services:
+#     pgadmin:
+#       loadBalancer:
+#         servers:
+#           - url: "http://raspiska_pgadmin:80"

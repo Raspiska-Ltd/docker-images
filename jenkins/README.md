@@ -28,7 +28,7 @@ This Docker setup provides a complete CI/CD solution for Raspiska Tech infrastru
    ```
 
 3. Access Jenkins at:
-   - Direct: [http://localhost:8080/jenkins](http://localhost:8080/jenkins)
+   - Direct: [http://localhost:8181/jenkins](http://localhost:8181/jenkins)
    - Traefik: [http://jenkins.raspiska.local/jenkins](http://jenkins.raspiska.local/jenkins)
    - Kong: [http://kong.raspiska.local/jenkins](http://kong.raspiska.local/jenkins)
 
@@ -76,7 +76,7 @@ To integrate with GitHub:
 
 1. Update the GitHub credentials in the Jenkins Configuration as Code file
 2. Configure webhooks in your GitHub repository to trigger builds:
-   - Payload URL: http://jenkins.raspiska.local/jenkins/github-webhook/
+   - Payload URL: [http://jenkins.raspiska.local/jenkins/github-webhook/](http://jenkins.raspiska.local/jenkins/github-webhook/)
    - Content type: application/json
    - Events: Push, Pull Request, etc.
 

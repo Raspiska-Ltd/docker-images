@@ -146,7 +146,7 @@ if [ -z "$JENKINS_ADMIN_PASSWORD" ]; then
 fi
 
 echo -e "\n${GREEN}=== Jenkins CI/CD setup completed successfully! ===${NC}"
-echo -e "Jenkins is running at: http://localhost:8080/jenkins"
+echo -e "Jenkins is running at: http://localhost:8181/jenkins"
 echo -e "\nWith Traefik:"
 echo -e "Jenkins: http://jenkins.raspiska.local/jenkins"
 echo -e "\nWith Kong:"
