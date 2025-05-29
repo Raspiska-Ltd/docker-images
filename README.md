@@ -172,6 +172,53 @@ A high-performance PostgreSQL database with custom configuration and tools.
 
 **Directory:** [/postgresql](/postgresql)
 
+### Jenkins CI/CD Pipeline
+
+A Jenkins CI/CD server for automating builds, tests, and deployments.
+
+**Features:**
+
+- Jenkins LTS with JDK 17
+- Configuration as Code (JCasC) for automated setup
+- Jenkins agent for distributed builds
+- Pipeline as Code using Jenkinsfile
+- Integration with Docker for containerized builds
+- Pre-configured security settings
+- Comprehensive test framework for infrastructure validation
+
+**Directory:** [/jenkins](/jenkins)
+
+### MinIO Object Storage
+
+An S3-compatible object storage solution for storing and retrieving data.
+
+**Features:**
+
+- S3-compatible API for all storage operations
+- Default buckets for backups, logs, artifacts, and public files
+- High-performance object storage with erasure coding
+- Security with encryption and access control
+- Integration with PostgreSQL for backups
+- Integration with Jenkins for artifact storage
+- Prometheus-compatible metrics for monitoring
+
+**Directory:** [/minio](/minio)
+
+### OpenTelemetry Distributed Tracing
+
+A distributed tracing and observability framework for end-to-end visibility.
+
+**Features:**
+
+- OpenTelemetry Collector for centralized telemetry processing
+- Multiple tracing backends (Jaeger, Zipkin, Tempo)
+- Integration with Prometheus for metrics collection
+- Service dependency graphs and performance monitoring
+- Code examples for Java, Python, and Node.js instrumentation
+- End-to-end visibility across all services
+
+**Directory:** [/opentelemetry](/opentelemetry)
+
 ## Usage
 
 Each image directory contains a `setup.sh` script that automates the process of building, running, and testing the Docker container. To use any of these images:

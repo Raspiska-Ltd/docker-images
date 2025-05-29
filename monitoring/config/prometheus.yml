@@ -71,3 +71,8 @@ scrape_configs:
     static_configs:
       - targets: ['raspiska_n8n:5678']
     metrics_path: /metrics
+
+  - job_name: 'otel-collector'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['raspiska_otel_collector:8889']
