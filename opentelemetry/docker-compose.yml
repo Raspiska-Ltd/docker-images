@@ -1,0 +1,110 @@
+version: '3'
+
+services:
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: raspiska_otel_collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Metrics
+      - "8889:8889"   # Prometheus exporter
+      - "13133:13133" # Health check
+    networks:
+      - opentelemetry_network
+      - traefik_network
+      - prometheus_network
+    restart: unless-stopped
+    depends_on:
+      - jaeger
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=raspiska_traefik_network"
+      - "traefik.http.routers.otel-collector.rule=Host(`otel-collector.raspiska.local`)"
+      - "traefik.http.routers.otel-collector.entrypoints=web"
+      - "traefik.http.services.otel-collector.loadbalancer.server.port=8888"
+      - "traefik.http.routers.otel-collector.middlewares=secure-headers"
+
+  # Jaeger - Distributed Tracing Backend
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: raspiska_jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+    ports:
+      - "16686:16686"  # UI
+      - "14250:14250"  # Model
+      - "14268:14268"  # Jaeger HTTP
+      - "14269:14269"  # Admin
+      - "9411:9411"    # Zipkin compatible endpoint
+    networks:
+      - opentelemetry_network
+      - traefik_network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=raspiska_traefik_network"
+      - "traefik.http.routers.jaeger.rule=Host(`jaeger.raspiska.local`)"
+      - "traefik.http.routers.jaeger.entrypoints=web"
+      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
+      - "traefik.http.routers.jaeger.middlewares=secure-headers"
+
+  # Zipkin - Alternative Tracing Backend
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: raspiska_zipkin
+    ports:
+      - "9412:9411"  # Shifted to avoid conflict with Jaeger's Zipkin port
+    networks:
+      - opentelemetry_network
+      - traefik_network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=raspiska_traefik_network"
+      - "traefik.http.routers.zipkin.rule=Host(`zipkin.raspiska.local`)"
+      - "traefik.http.routers.zipkin.entrypoints=web"
+      - "traefik.http.services.zipkin.loadbalancer.server.port=9411"
+      - "traefik.http.routers.zipkin.middlewares=secure-headers"
+
+  # Tempo - Grafana's Tracing Backend
+  tempo:
+    image: grafana/tempo:latest
+    container_name: raspiska_tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./config/tempo.yaml:/etc/tempo.yaml
+      - tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200"  # Tempo
+      - "4317:4317"  # OTLP gRPC (exposed by collector)
+    networks:
+      - opentelemetry_network
+      - traefik_network
+      - prometheus_network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=raspiska_traefik_network"
+      - "traefik.http.routers.tempo.rule=Host(`tempo.raspiska.local`)"
+      - "traefik.http.routers.tempo.entrypoints=web"
+      - "traefik.http.services.tempo.loadbalancer.server.port=3200"
+      - "traefik.http.routers.tempo.middlewares=secure-headers"
+
+networks:
+  opentelemetry_network:
+    name: raspiska_opentelemetry_network
+  traefik_network:
+    external: true
+    name: raspiska_traefik_network
+  prometheus_network:
+    external: true
+    name: raspiska_prometheus_network
+
+volumes:
+  tempo-data:

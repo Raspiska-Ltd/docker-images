@@ -1,0 +1,107 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  
+  # Receive Prometheus metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['localhost:8888']
+        - job_name: 'redis'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['raspiska_redis_exporter:9121']
+        - job_name: 'valkey'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['raspiska_valkey_exporter:9121']
+        - job_name: 'postgresql'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['raspiska_postgres_exporter:9187']
+        - job_name: 'node'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['raspiska_node_exporter:9100']
+        - job_name: 'kong'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['raspiska_blackbox_exporter:9115']
+
+  # Zipkin traces
+  zipkin:
+    endpoint: 0.0.0.0:9411
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+  # Add resource attributes for better identification
+  resource:
+    attributes:
+      - key: service.name
+        value: "raspiska-infrastructure"
+        action: upsert
+      - key: deployment.environment
+        value: "development"
+        action: upsert
+
+  # Memory limiter
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+
+exporters:
+  # Export to Prometheus
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    namespace: raspiska
+
+  # Export to Jaeger
+  otlp:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+  # Export to Zipkin
+  zipkin:
+    endpoint: "http://zipkin:9411/api/v2/spans"
+    format: proto
+
+  # Export to Tempo
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  # Debug logging
+  logging:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp, zipkin]
+      processors: [memory_limiter, batch, resource]
+      exporters: [otlp, zipkin, otlp/tempo, logging]
+    
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, batch, resource]
+      exporters: [prometheus, logging]
+
+  telemetry:
+    logs:
+      level: "info"
+    metrics:
+      level: "detailed"
+      address: 0.0.0.0:8888

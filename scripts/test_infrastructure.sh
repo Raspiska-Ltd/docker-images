@@ -244,4 +244,32 @@ if [ -d "../minio" ]; then
     fi
 fi
 
+# Test OpenTelemetry
+if [ -d "../opentelemetry" ]; then
+    print_header "OpenTelemetry Distributed Tracing"
+    test_container_status "raspiska_otel_collector"
+    test_container_status "raspiska_jaeger"
+    test_container_status "raspiska_zipkin"
+    test_container_status "raspiska_tempo"
+    test_http_endpoint "Jaeger UI" "http://localhost:16686" "200" "true"
+    test_http_endpoint "Zipkin UI" "http://localhost:9412" "200" "true"
+    test_http_endpoint "Tempo" "http://localhost:3200" "200" "true"
+    test_http_endpoint "OpenTelemetry Collector" "http://localhost:8888" "200" "true"
+    
+    # Test OTLP endpoints
+    echo -n "Testing OTLP gRPC endpoint... "
+    if nc -z localhost 4317; then
+        print_success "OTLP gRPC endpoint is accessible"
+    else
+        print_error "OTLP gRPC endpoint is not accessible"
+    fi
+    
+    echo -n "Testing OTLP HTTP endpoint... "
+    if nc -z localhost 4318; then
+        print_success "OTLP HTTP endpoint is accessible"
+    else
+        print_error "OTLP HTTP endpoint is not accessible"
+    fi
+fi
+
 echo -e "\n${GREEN}=== Infrastructure tests completed ===${NC}"

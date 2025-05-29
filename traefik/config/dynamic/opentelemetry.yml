@@ -1,0 +1,54 @@
+http:
+  routers:
+    jaeger:
+      rule: "Host(`jaeger.raspiska.local`)"
+      service: "jaeger"
+      entryPoints:
+        - "web"
+      middlewares:
+        - "secure-headers"
+
+    zipkin:
+      rule: "Host(`zipkin.raspiska.local`)"
+      service: "zipkin"
+      entryPoints:
+        - "web"
+      middlewares:
+        - "secure-headers"
+
+    tempo:
+      rule: "Host(`tempo.raspiska.local`)"
+      service: "tempo"
+      entryPoints:
+        - "web"
+      middlewares:
+        - "secure-headers"
+
+    otel-collector:
+      rule: "Host(`otel-collector.raspiska.local`)"
+      service: "otel-collector"
+      entryPoints:
+        - "web"
+      middlewares:
+        - "secure-headers"
+
+  services:
+    jaeger:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_jaeger:16686"
+
+    zipkin:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_zipkin:9411"
+
+    tempo:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_tempo:3200"
+
+    otel-collector:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_otel_collector:8888"
