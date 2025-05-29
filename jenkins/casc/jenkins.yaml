@@ -1,0 +1,106 @@
+jenkins:
+  systemMessage: "Raspiska Tech CI/CD Server"
+  numExecutors: 2
+  scmCheckoutRetryCount: 2
+  mode: NORMAL
+  
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: ${JENKINS_ADMIN_ID}
+          password: ${JENKINS_ADMIN_PASSWORD}
+  
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  
+  remotingSecurity:
+    enabled: true
+
+security:
+  queueItemAuthenticator:
+    authenticators:
+      - global:
+          strategy: triggeringUsersAuthorizationStrategy
+
+unclassified:
+  location:
+    url: http://jenkins.raspiska.local/jenkins/
+  
+tool:
+  git:
+    installations:
+      - name: Default
+        home: git
+  
+  maven:
+    installations:
+      - name: Maven 3
+        home: /usr/share/maven
+  
+  jdk:
+    installations:
+      - name: JDK 17
+        home: /opt/java/openjdk
+
+jobs:
+  - script: >
+      folder('Raspiska') {
+          displayName('Raspiska Tech')
+          description('Raspiska Tech CI/CD Pipelines')
+      }
+  
+  - script: >
+      pipelineJob('Raspiska/infrastructure-pipeline') {
+          definition {
+              cpsScm {
+                  scm {
+                      git {
+                          remote {
+                              url('https://github.com/yourusername/raspiska.git')
+                              credentials('github-credentials')
+                          }
+                          branch('*/main')
+                          extensions {}
+                      }
+                  }
+                  scriptPath('Jenkinsfile')
+              }
+          }
+          triggers {
+              scm('H/15 * * * *')
+          }
+      }
+  
+  - script: >
+      pipelineJob('Raspiska/deploy-all') {
+          definition {
+              cps {
+                  script('''
+                  pipeline {
+                      agent any
+                      stages {
+                          stage('Deploy Infrastructure') {
+                              steps {
+                                  sh 'cd /var/jenkins_home/workspace/Raspiska/infrastructure-pipeline && ./scripts/setup_dev_environment.sh'
+                              }
+                          }
+                      }
+                  }
+                  ''')
+                  sandbox(true)
+              }
+          }
+      }
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "github-credentials"
+              username: "github-user"
+              password: "github-token"
+              description: "GitHub Credentials"

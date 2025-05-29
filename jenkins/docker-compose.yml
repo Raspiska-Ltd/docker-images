@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  # Jenkins - CI/CD Server
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: raspiska_jenkins
+    restart: unless-stopped
+    user: root
+    environment:
+      - JENKINS_OPTS="--prefix=/jenkins"
+      - JAVA_OPTS="-Djenkins.install.runSetupWizard=true -Dhudson.model.DirectoryBrowserSupport.CSP="
+      - TZ=Europe/Istanbul
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./init.groovy.d:/var/jenkins_home/init.groovy.d
+      - ./casc:/var/jenkins_home/casc_configs
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    networks:
+      - jenkins_network
+      - traefik_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/jenkins"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jenkins.rule=Host(`jenkins.raspiska.local`)"
+      - "traefik.http.routers.jenkins.entrypoints=web"
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+      - "traefik.http.routers.jenkins.middlewares=jenkins-stripprefix,secure-headers@file"
+      - "traefik.http.middlewares.jenkins-stripprefix.stripprefix.prefixes=/jenkins"
+    
+  # Jenkins Agent - Worker Node
+  jenkins-agent:
+    image: jenkins/inbound-agent:latest
+    container_name: raspiska_jenkins_agent
+    restart: unless-stopped
+    environment:
+      - JENKINS_URL=http://jenkins:8080/jenkins
+      - JENKINS_AGENT_NAME=docker-agent
+      - JENKINS_SECRET=${JENKINS_AGENT_SECRET:-secret}
+      - JENKINS_AGENT_WORKDIR=/home/jenkins/agent
+    volumes:
+      - jenkins_agent_home:/home/jenkins/agent
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - jenkins_network
+    depends_on:
+      - jenkins
+
+volumes:
+  jenkins_home:
+    name: raspiska_jenkins_home
+  jenkins_agent_home:
+    name: raspiska_jenkins_agent_home
+
+networks:
+  jenkins_network:
+    name: raspiska_jenkins_network
+  traefik_network:
+    external: true
+    name: raspiska_traefik_network

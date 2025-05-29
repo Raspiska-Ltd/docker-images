@@ -1,0 +1,101 @@
+pipeline {
+    agent {
+        label 'docker'
+    }
+    
+    environment {
+        DOCKER_REGISTRY = 'registry.raspiska.local'
+        DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh '''
+                cd docker-images
+                for service in */; do
+                    if [ -f "${service}docker-compose.yml" ]; then
+                        echo "Building ${service%/}..."
+                        cd ${service}
+                        docker-compose build
+                        cd ..
+                    fi
+                done
+                '''
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh '''
+                cd docker-images
+                for service in */; do
+                    if [ -f "${service}setup.sh" ]; then
+                        echo "Testing ${service%/}..."
+                        cd ${service}
+                        # Add test commands here
+                        cd ..
+                    fi
+                done
+                '''
+            }
+        }
+        
+        stage('Deploy to Development') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sh '''
+                cd docker-images
+                for service in */; do
+                    if [ -f "${service}setup.sh" ]; then
+                        echo "Deploying ${service%/} to development..."
+                        cd ${service}
+                        ./setup.sh
+                        cd ..
+                    fi
+                done
+                '''
+            }
+        }
+        
+        stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                input message: 'Deploy to production?', ok: 'Yes'
+                sh '''
+                cd docker-images
+                for service in */; do
+                    if [ -f "${service}setup.sh" ]; then
+                        echo "Deploying ${service%/} to production..."
+                        cd ${service}
+                        ./setup.sh
+                        cd ..
+                    fi
+                done
+                '''
+            }
+        }
+    }
+    
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
