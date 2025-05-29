@@ -1,0 +1,17 @@
+tcp:
+  routers:
+    # PostgreSQL Router
+    postgres:
+      entryPoints:
+        - "postgres"
+      rule: "HostSNI(`*`)"
+      service: "postgres"
+      tls:
+        passthrough: true
+
+  services:
+    # PostgreSQL Service
+    postgres:
+      loadBalancer:
+        servers:
+          - address: "raspiska_postgres:5432"

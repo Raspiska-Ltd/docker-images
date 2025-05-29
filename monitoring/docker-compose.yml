@@ -142,15 +142,17 @@ services:
       - keycloak_network
       - n8n_network
 
-  # Kong Exporter - Kong Metrics
+  # Kong Exporter - Kong API Gateway metrics
   kong-exporter:
-    image: kong/prometheus-plugin:1.1
+    image: prom/blackbox-exporter:latest
     container_name: raspiska_kong_exporter
     restart: unless-stopped
-    environment:
-      - KONG_ADMIN_URL=http://raspiska_kong:8001
     ports:
-      - "9542:9542"
+      - "9542:9115"
+    command:
+      - "--config.file=/etc/blackbox_exporter/config.yml"
+    volumes:
+      - ./config/blackbox.yml:/etc/blackbox_exporter/config.yml
     networks:
       - monitoring_network
       - kong_network

@@ -1,0 +1,18 @@
+http:
+  routers:
+    # Uptime Kuma Router
+    uptime-kuma:
+      rule: "Host(`status.raspiska.local`)"
+      service: uptime-kuma
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+  services:
+    # Uptime Kuma Service
+    uptime-kuma:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_uptime_kuma:3001"
+        passHostHeader: true

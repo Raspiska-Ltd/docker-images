@@ -47,10 +47,18 @@ scrape_configs:
     static_configs:
       - targets: ['postgres-exporter:9187']
 
-  # Kong metrics
+  # Kong API Gateway metrics
   - job_name: 'kong'
+    scrape_interval: 10s
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+      target: ['raspiska_kong:8001']
     static_configs:
-      - targets: ['kong-exporter:9542']
+      - targets: ['kong-exporter:9115']
+        labels:
+          instance: 'kong'
+          service: 'kong'
 
   # Keycloak metrics
   - job_name: 'keycloak'

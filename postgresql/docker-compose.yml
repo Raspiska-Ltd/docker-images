@@ -15,12 +15,9 @@ services:
       REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-secure_replication_password}
       ENABLE_REPLICATION: ${ENABLE_REPLICATION:-false}
       ENABLE_BACKUPS: ${ENABLE_BACKUPS:-true}
-      PGDATA: /var/lib/postgresql/data/pgdata
       TZ: Europe/Istanbul
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./config/postgresql.conf:/var/lib/postgresql/data/pgdata/postgresql.conf
-      - ./config/pg_hba.conf:/var/lib/postgresql/data/pgdata/pg_hba.conf
       - ./scripts:/var/lib/postgresql/scripts
       - ./backups:/var/lib/postgresql/backups
     ports:
@@ -74,11 +71,10 @@ services:
     container_name: raspiska_pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@raspiska.local}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-secure_pgadmin_password}
-      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "True"
-      PGADMIN_CONFIG_LOGIN_BANNER: "Authorized users only. All activities may be monitored and reported."
-      PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: 10
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+      PGADMIN_CONFIG_CHECK_EMAIL_DELIVERABILITY: "False"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:

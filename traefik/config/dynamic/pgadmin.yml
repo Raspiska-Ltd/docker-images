@@ -1,0 +1,18 @@
+http:
+  routers:
+    # pgAdmin Router
+    pgadmin:
+      rule: "Host(`pgadmin.raspiska.local`)"
+      service: "pgadmin"
+      entryPoints:
+        - "web"
+      middlewares:
+        - "secure-headers"
+
+  services:
+    # pgAdmin Service
+    pgadmin:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_pgadmin:80"
+        passHostHeader: true

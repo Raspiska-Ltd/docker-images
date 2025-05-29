@@ -1,0 +1,50 @@
+http:
+  routers:
+    # Prometheus Router
+    prometheus:
+      rule: "Host(`prometheus.raspiska.local`)"
+      service: prometheus
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+    # Grafana Router
+    grafana:
+      rule: "Host(`grafana.raspiska.local`)"
+      service: grafana
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+    # Alertmanager Router
+    alertmanager:
+      rule: "Host(`alertmanager.raspiska.local`)"
+      service: alertmanager
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+  services:
+    # Prometheus Service
+    prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_prometheus:9090"
+        passHostHeader: true
+
+    # Grafana Service
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_grafana:3000"
+        passHostHeader: true
+
+    # Alertmanager Service
+    alertmanager:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_alertmanager:9093"
+        passHostHeader: true
