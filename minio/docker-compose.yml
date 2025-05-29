@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: raspiska_minio
+    command: server --console-address ":9001" /data
+    volumes:
+      - ./data:/data
+      - ./config:/root/.minio
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BROWSER_REDIRECT_URL=http://minio-console.raspiska.local
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - minio_network
+      - traefik_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=raspiska_traefik_network"
+      # API Service
+      - "traefik.http.routers.minio-api.rule=Host(`minio.raspiska.local`)"
+      - "traefik.http.routers.minio-api.entrypoints=web"
+      - "traefik.http.routers.minio-api.service=minio-api"
+      - "traefik.http.services.minio-api.loadbalancer.server.port=9000"
+      # Console Service
+      - "traefik.http.routers.minio-console.rule=Host(`minio-console.raspiska.local`)"
+      - "traefik.http.routers.minio-console.entrypoints=web"
+      - "traefik.http.routers.minio-console.service=minio-console"
+      - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
+      # Middlewares
+      - "traefik.http.routers.minio-api.middlewares=secure-headers"
+      - "traefik.http.routers.minio-console.middlewares=secure-headers"
+
+  # Create default buckets and set policies
+  minio-mc:
+    image: minio/mc:latest
+    container_name: raspiska_minio_mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10;
+      /usr/bin/mc config host add myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb --ignore-existing myminio/backups;
+      /usr/bin/mc mb --ignore-existing myminio/logs;
+      /usr/bin/mc mb --ignore-existing myminio/artifacts;
+      /usr/bin/mc mb --ignore-existing myminio/public;
+      /usr/bin/mc policy set download myminio/public;
+      /usr/bin/mc admin user add myminio ${MINIO_APP_USER} ${MINIO_APP_PASSWORD};
+      /usr/bin/mc admin policy attach myminio readwrite --user=${MINIO_APP_USER};
+      exit 0;
+      "
+    networks:
+      - minio_network
+    restart: on-failure
+
+networks:
+  minio_network:
+    name: raspiska_minio_network
+  traefik_network:
+    external: true
+    name: raspiska_traefik_network

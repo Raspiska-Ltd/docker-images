@@ -223,4 +223,25 @@ if [ -d "../keycloak" ]; then
     test_http_endpoint "Keycloak" "http://localhost:8080/auth" "200" "true"
 fi
 
+# Test MinIO
+if [ -d "../minio" ]; then
+    print_header "MinIO Object Storage"
+    test_container_status "raspiska_minio"
+    test_http_endpoint "MinIO API" "http://localhost:9000" "200" "true"
+    test_http_endpoint "MinIO Console" "http://localhost:9001" "200" "true"
+    
+    # Test bucket access if mc is available
+    if command -v mc &> /dev/null; then
+        echo -n "Testing MinIO bucket access... "
+        # Configure mc client
+        mc config host add myminio http://localhost:9000 admin secure_minio_password > /dev/null 2>&1
+        # Test bucket listing
+        if mc ls myminio > /dev/null 2>&1; then
+            print_success "Bucket access successful"
+        else
+            print_error "Bucket access failed"
+        fi
+    fi
+fi
+
 echo -e "\n${GREEN}=== Infrastructure tests completed ===${NC}"
