@@ -1,2 +1,2 @@
 traefik/logs/*
-minio/data/.minio.sys/tmp/*
+minio/data/*
