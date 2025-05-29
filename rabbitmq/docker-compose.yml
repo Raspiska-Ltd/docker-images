@@ -1,0 +1,27 @@
+services:
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: raspiska_rabbitmq
+    hostname: rabbitmq.local
+    ports:
+      - "5672:5672"   # AMQP protocol port
+      - "15672:15672" # Management UI port
+    env_file:
+      - .env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    # Add extra hosts to resolve the hostname locally
+    extra_hosts:
+      - "rabbitmq.local:127.0.0.1"
+
+volumes:
+  rabbitmq_data:
+    name: raspiska_rabbitmq_data
