@@ -29,6 +29,37 @@ A custom RabbitMQ image with enhanced plugins for message scheduling, load balan
 
 **Directory:** [/rabbitmq](/rabbitmq)
 
+### Redis with Sentinel
+
+A custom Redis image with persistence, high availability via Sentinel, and monitoring capabilities.
+
+**Features:**
+
+- Redis 7.x with AOF and RDB persistence
+- Redis Sentinel for high availability and automatic failover
+- Memory management with configurable limits and eviction policies
+- Password authentication and security features
+- Monitoring tools and health checks
+- Custom hostname configuration
+
+**Directory:** [/redis](/redis)
+
+### Valkey with Sentinel
+
+A custom Valkey image (Redis-compatible database) with persistence, high availability via Sentinel, and monitoring capabilities.
+
+**Features:**
+
+- Valkey (latest) with AOF and RDB persistence
+- Redis Sentinel for high availability and automatic failover
+- Memory management with configurable limits and eviction policies
+- Password authentication and security features
+- Monitoring tools and health checks
+- Custom hostname configuration
+- Runs on alternate ports (6380, 26380) to avoid conflicts with Redis
+
+**Directory:** [/valkey](/valkey)
+
 ## Usage
 
 Each image directory contains a `setup.sh` script that automates the process of building, running, and testing the Docker container. To use any of these images:

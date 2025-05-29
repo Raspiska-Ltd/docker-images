@@ -1,0 +1,26 @@
+services:
+  valkey:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: raspiska_valkey
+    hostname: valkey.local
+    ports:
+      - "6380:6379"   # Valkey port (using 6380 to avoid conflict with Redis)
+      - "26380:26379" # Sentinel port (using 26380 to avoid conflict with Redis)
+    env_file:
+      - .env
+    volumes:
+      - valkey_data:/valkey-data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    extra_hosts:
+      - "valkey.local:127.0.0.1"
+
+volumes:
+  valkey_data:
+    name: raspiska_valkey_data

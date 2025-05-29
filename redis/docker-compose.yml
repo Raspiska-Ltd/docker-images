@@ -1,0 +1,26 @@
+services:
+  redis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: raspiska_redis
+    hostname: redis.local
+    ports:
+      - "6379:6379"   # Redis port
+      - "26379:26379" # Sentinel port
+    env_file:
+      - .env
+    volumes:
+      - redis_data:/redis-data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    extra_hosts:
+      - "redis.local:127.0.0.1"
+
+volumes:
+  redis_data:
+    name: raspiska_redis_data
