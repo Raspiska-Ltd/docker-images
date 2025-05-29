@@ -1,0 +1,18 @@
+http:
+  routers:
+    # Keycloak Router
+    keycloak:
+      rule: "Host(`keycloak.raspiska.local`)"
+      service: keycloak
+      entryPoints:
+        - web
+      middlewares:
+        - secure-headers
+
+  services:
+    # Keycloak Service
+    keycloak:
+      loadBalancer:
+        servers:
+          - url: "http://raspiska_keycloak:8080"
+        passHostHeader: true

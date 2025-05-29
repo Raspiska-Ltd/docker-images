@@ -28,6 +28,27 @@ This Docker image provides a Traefik reverse proxy and load balancer for service
 
 3. Access the Traefik dashboard at [http://traefik.raspiska.local:8080](http://traefik.raspiska.local:8080) or [http://localhost:8080](http://localhost:8080)
 
+## Middleware Configuration
+
+Traefik uses middleware to modify requests or responses before they reach your services. The default middleware configuration is located in `config/dynamic/middleware.yml` and includes:
+
+- **secure-headers**: Adds security-related HTTP headers to all responses
+  - Prevents clickjacking with frame deny
+  - Enables browser XSS protection
+  - Prevents MIME-type sniffing
+  - Configures HSTS for secure connections
+
+To use middleware in your service configuration, add it to the `middlewares` section of your router:
+
+```yaml
+routers:
+  my-service:
+    rule: "Host(`my-service.raspiska.local`)"
+    service: my-service
+    middlewares:
+      - secure-headers
+```
+
 ## Adding New Services
 
 There are two ways to add new services to Traefik:

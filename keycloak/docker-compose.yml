@@ -1,0 +1,65 @@
+services:
+  # Keycloak Database
+  keycloak-db:
+    image: postgres:13-alpine
+    container_name: raspiska_keycloak_db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - keycloak_network
+
+  # Keycloak Server
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.1
+    container_name: raspiska_keycloak
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
+      KC_HOSTNAME: keycloak.raspiska.local
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_PROXY: edge
+    command:
+      - start-dev
+    ports:
+      - "8180:8080"  # Keycloak HTTP (using 8180 to avoid conflict with Traefik dashboard)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - keycloak_network
+      - traefik_network
+      - kong_network
+
+volumes:
+  keycloak_data:
+    name: raspiska_keycloak_data
+
+networks:
+  keycloak_network:
+    name: raspiska_keycloak_network
+  traefik_network:
+    external: true
+    name: raspiska_traefik_network
+  kong_network:
+    external: true
+    name: raspiska_kong_network

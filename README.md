@@ -78,12 +78,11 @@ A Traefik reverse proxy and load balancer for managing access to all Raspiska Te
 
 ### Kong API Gateway
 
-A Kong API Gateway with Konga admin UI for managing APIs and microservices.
+A Kong API Gateway for managing APIs and microservices.
 
 **Features:**
 
 - High-performance API gateway with plugin architecture
-- Konga web-based admin interface for easy management
 - PostgreSQL database for configuration storage
 - Authentication, rate limiting, and request transformation
 - Microservice routing and load balancing
@@ -91,6 +90,22 @@ A Kong API Gateway with Konga admin UI for managing APIs and microservices.
 - Comprehensive documentation for API management
 
 **Directory:** [/kong](/kong)
+
+### Keycloak Identity and Access Management
+
+A Keycloak identity and access management solution for authentication and authorization.
+
+**Features:**
+
+- Single Sign-On (SSO) across all applications
+- User management and authentication
+- Social login and identity brokering
+- Multi-factor authentication
+- Role-based access control
+- Integration with Kong API Gateway
+- PostgreSQL database for configuration storage
+
+**Directory:** [/keycloak](/keycloak)
 
 ## Usage
 
